@@ -6,9 +6,11 @@ import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.DownloadListener
@@ -25,6 +27,7 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import java.io.File
@@ -62,33 +66,102 @@ fun AdvancedWebViewScreen(
     var webView by remember { mutableStateOf<WebView?>(null) }
     var filePathCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingCameraLaunch by remember { mutableStateOf<(() -> Unit)?>(null) }
 
-    val pickMultipleLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenMultipleDocuments(),
-    ) { uris ->
-        filePathCallback?.onReceiveValue(uris.toTypedArray())
+    fun finishFileChooser(result: Array<Uri>) {
+        filePathCallback?.onReceiveValue(result)
         filePathCallback = null
+        cameraImageUri = null
     }
 
     val takePhotoLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture(),
     ) { success ->
         val result = if (success && cameraImageUri != null) arrayOf(cameraImageUri!!) else emptyArray()
-        filePathCallback?.onReceiveValue(result)
-        filePathCallback = null
+        finishFileChooser(result)
     }
 
-    val openDocumentLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument(),
-    ) { uri ->
-        filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else emptyArray())
-        filePathCallback = null
+    val fileChooserLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result: ActivityResult ->
+        if (result.resultCode != Activity.RESULT_OK) {
+            finishFileChooser(emptyArray())
+            return@rememberLauncherForActivityResult
+        }
+
+        val data = result.data
+        val uris = when {
+            data?.clipData != null -> {
+                val clipData = data.clipData!!
+                Array(clipData.itemCount) { index -> clipData.getItemAt(index).uri }
+            }
+
+            data?.data != null -> arrayOf(data.data!!)
+            cameraImageUri != null -> arrayOf(cameraImageUri!!)
+            else -> emptyArray()
+        }
+        finishFileChooser(uris)
     }
 
     val requestWritePermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) {
         // The user can tap the same download link again after granting permission.
+    }
+
+    val requestCameraPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            pendingCameraLaunch?.invoke()
+        } else {
+            finishFileChooser(emptyArray())
+        }
+        pendingCameraLaunch = null
+    }
+
+    fun createCameraImageUri(ctx: Context): Uri {
+        val imageFile = File(ctx.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "camera_${System.currentTimeMillis()}.jpg")
+        return FileProvider.getUriForFile(ctx, "${ctx.packageName}.fileprovider", imageFile)
+    }
+
+    fun launchCamera(ctx: Context) {
+        val launch = {
+            val imageUri = createCameraImageUri(ctx)
+            cameraImageUri = imageUri
+            takePhotoLauncher.launch(imageUri)
+        }
+        if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            launch()
+        } else {
+            pendingCameraLaunch = launch
+            requestCameraPermission.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    fun createFileChooserIntent(ctx: Context, fileChooserParams: WebChromeClient.FileChooserParams?): Intent {
+        val baseIntent = runCatching {
+            fileChooserParams?.createIntent()
+        }.getOrNull() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+        }
+
+        val accept = fileChooserParams?.acceptTypes?.joinToString(",").orEmpty()
+        val acceptsImage = accept.isBlank() || accept.contains("image") || accept.contains("*/*")
+        val chooser = Intent.createChooser(baseIntent, "Select file")
+
+        if (acceptsImage) {
+            val imageUri = createCameraImageUri(ctx)
+            cameraImageUri = imageUri
+            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            }
+            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
+        }
+
+        return chooser
     }
 
     fun startDownload(
@@ -169,25 +242,14 @@ fun AdvancedWebViewScreen(
                         filePathCallback_: ValueCallback<Array<Uri>>?,
                         fileChooserParams: FileChooserParams?,
                     ): Boolean {
+                        filePathCallback?.onReceiveValue(null)
                         filePathCallback = filePathCallback_
                         val accept = fileChooserParams?.acceptTypes?.joinToString(",") ?: "*/*"
-                        val allowMultiple = fileChooserParams?.mode == FileChooserParams.MODE_OPEN_MULTIPLE
 
                         if (accept.contains("image") && fileChooserParams?.isCaptureEnabled == true) {
-                            val imageUri = FileProvider.getUriForFile(
-                                ctx,
-                                "${ctx.packageName}.fileprovider",
-                                File(ctx.getExternalFilesDir(null), "camera_${System.currentTimeMillis()}.jpg"),
-                            )
-                            cameraImageUri = imageUri
-                            takePhotoLauncher.launch(imageUri)
+                            launchCamera(ctx)
                         } else {
-                            val types = if (accept.isBlank()) arrayOf("*/*") else accept.split(",").toTypedArray()
-                            if (allowMultiple) {
-                                pickMultipleLauncher.launch(types)
-                            } else {
-                                openDocumentLauncher.launch(types)
-                            }
+                            fileChooserLauncher.launch(createFileChooserIntent(ctx, fileChooserParams))
                         }
                         return true
                     }
