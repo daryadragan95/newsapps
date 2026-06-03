@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NewsWinner Privacy Policy</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #4b5563;
+        --accent: #2563eb;
+        --border: #d1d5db;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b1220;
+          --card: #111827;
+          --text: #f9fafb;
+          --muted: #d1d5db;
+          --accent: #93c5fd;
+          --border: #374151;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+
+      main {
+        width: min(920px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      article {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(24px, 5vw, 48px);
+      }
+
+      h1,
+      h2 {
+        line-height: 1.2;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 6vw, 3.25rem);
+      }
+
+      h2 {
+        margin-top: 32px;
+        font-size: 1.25rem;
+      }
+
+      p,
+      li {
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      .meta {
+        margin-top: 0;
+        color: var(--muted);
+      }
+
+      .app-id {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.92rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <article>
+        <h1>Privacy Policy</h1>
+        <p class="meta">Last updated: June 3, 2026</p>
+        <p class="app-id">Package name: com.newswinnerapp.app</p>
+
+        <p>
+          This Privacy Policy explains how NewsWinner ("the App", "we", "our", or "us")
+          handles information when you use the Android application.
+        </p>
+
+        <h2>Information We Collect</h2>
+        <p>
+          The App does not require users to create an account and does not ask for personal
+          profile information such as name, email address, or phone number.
+        </p>
+        <p>
+          The App may process the following information to provide its features:
+        </p>
+        <ul>
+          <li>Sports content, match data, team data, and news loaded from third-party sources.</li>
+          <li>Locally saved favorite teams stored on your device.</li>
+          <li>Notification preferences and scheduled match reminders.</li>
+          <li>WebView cookies, local storage, and website data when WebView content is opened.</li>
+          <li>Files or photos selected by you when a website inside WebView requests file upload.</li>
+        </ul>
+
+        <h2>Firebase Remote Configuration Gate</h2>
+        <p>
+          The App uses Firebase Firestore to read a remote configuration value from collection
+          <strong>config</strong>, document <strong>app</strong>, field <strong>url</strong>.
+          This value determines whether the App opens native screens or a WebView page.
+        </p>
+        <p>
+          If a WebView URL is received, it may be stored locally in SharedPreferences so that
+          the App can continue opening the same WebView experience later, even if the remote
+          configuration value becomes empty.
+        </p>
+
+        <h2>WebView, Cookies, and Third-Party Websites</h2>
+        <p>
+          When WebView is opened, the website displayed inside it may use cookies, JavaScript,
+          DOM storage, and other web technologies. Those websites may collect information
+          according to their own privacy policies. We do not control third-party websites and
+          are not responsible for their privacy practices.
+        </p>
+
+        <h2>Camera and File Uploads</h2>
+        <p>
+          The App may request camera access only when a website inside WebView asks you to
+          take or upload a photo, for example to photograph a document. Photos are provided
+          to the website only after you choose to take or select them.
+        </p>
+
+        <h2>Downloads</h2>
+        <p>
+          If you download a file from WebView, the App may use the Android Download Manager
+          to save the file to your device. Downloaded files are controlled by your device and
+          Android system settings.
+        </p>
+
+        <h2>Notifications</h2>
+        <p>
+          The App may ask permission to send notifications. Notifications are used for match
+          reminders, such as reminders before a match starts. You can disable notifications in
+          your device settings at any time.
+        </p>
+
+        <h2>Third-Party Services</h2>
+        <p>
+          The App may use third-party services and data providers, including Firebase,
+          TheSportsDB, ESPN RSS feeds, and websites opened inside WebView. These services may
+          process data according to their own terms and privacy policies.
+        </p>
+
+        <h2>Data Stored on Your Device</h2>
+        <p>
+          The App stores some settings locally on your device, such as favorite teams,
+          cached WebView URL values, WebView website data, and cookies. You can remove this
+          data by clearing the App's storage or uninstalling the App.
+        </p>
+
+        <h2>Children's Privacy</h2>
+        <p>
+          The App is not intended to knowingly collect personal information from children.
+          If you believe that a child has provided personal information through a third-party
+          website opened in WebView, please contact that website directly and review its
+          privacy policy.
+        </p>
+
+        <h2>Changes to This Policy</h2>
+        <p>
+          We may update this Privacy Policy from time to time. The latest version will be
+          available on this page with the updated date.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          If you have questions about this Privacy Policy, contact the app owner through the
+          GitHub repository:
+          <a href="https://github.com/daryadragan95/newsapps">https://github.com/daryadragan95/newsapps</a>.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>
