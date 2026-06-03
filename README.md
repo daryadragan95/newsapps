@@ -1,4 +1,4 @@
-# SportPulse
+# News Sport Winner
 
 Android MVP for sports news and upcoming matches. The app shows a 3-day schedule by sport, a selected match card, and core data such as league, time, status, round, venue, and score when the API has published it.
 

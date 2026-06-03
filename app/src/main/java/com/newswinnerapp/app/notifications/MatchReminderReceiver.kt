@@ -27,7 +27,7 @@ class MatchReminderReceiver : BroadcastReceiver() {
         val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
         val notification = NotificationCompat.Builder(context, MatchNotificationScheduler.CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(title.ifBlank { "SportPulse" })
+            .setContentTitle(title.ifBlank { "News Sport Winner" })
             .setContentText(body.ifBlank { "Match reminder" })
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)

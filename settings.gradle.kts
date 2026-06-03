@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SportPulse"
+rootProject.name = "NewsSportWinner"
 include(":app")

@@ -148,7 +148,7 @@ private fun Header(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "SportPulse",
+                    text = "News Sport Winner",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Black,
                 )
