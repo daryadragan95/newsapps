@@ -3,6 +3,7 @@ package com.newswinnerapp.app.ui.web
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
@@ -47,6 +48,7 @@ import androidx.core.content.FileProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import java.net.URISyntaxException
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -164,6 +166,43 @@ fun AdvancedWebViewScreen(
         return chooser
     }
 
+    fun handleExternalUrl(ctx: Context, url: String): Boolean {
+        val uri = runCatching { url.toUri() }.getOrNull() ?: return false
+        val scheme = uri.scheme.orEmpty()
+        if (scheme == "http" || scheme == "https") return false
+
+        if (scheme == "intent") {
+            return try {
+                val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                val fallbackUrl = intent.getStringExtra("browser_fallback_url")
+                if (intent.resolveActivity(ctx.packageManager) != null) {
+                    ctx.startActivity(intent)
+                } else if (!fallbackUrl.isNullOrBlank()) {
+                    ctx.startActivity(Intent(Intent.ACTION_VIEW, fallbackUrl.toUri()))
+                }
+                true
+            } catch (_: ActivityNotFoundException) {
+                true
+            } catch (_: URISyntaxException) {
+                true
+            }
+        }
+
+        return try {
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            if (intent.resolveActivity(ctx.packageManager) != null) {
+                ctx.startActivity(intent)
+            }
+            true
+        } catch (_: ActivityNotFoundException) {
+            true
+        }
+    }
+
     fun startDownload(
         ctx: Context,
         url: String,
@@ -259,7 +298,10 @@ fun AdvancedWebViewScreen(
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,
                         request: WebResourceRequest?,
-                    ): Boolean = false
+                    ): Boolean {
+                        val url = request?.url?.toString() ?: return false
+                        return handleExternalUrl(ctx, url)
+                    }
 
                     override fun onPageFinished(view: WebView, url: String) {
                         val cleaned = url
