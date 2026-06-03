@@ -1,4 +1,4 @@
-package com.example.sportpulse.data
+package com.newswinnerapp.app.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

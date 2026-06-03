@@ -1,7 +1,7 @@
-package com.example.sportpulse.data
+package com.newswinnerapp.app.data
 
-import com.example.sportpulse.domain.MatchInfo
-import com.example.sportpulse.domain.TeamInfo
+import com.newswinnerapp.app.domain.MatchInfo
+import com.newswinnerapp.app.domain.TeamInfo
 
 class SportsRepository(
     private val api: SportsApi,

@@ -1,4 +1,4 @@
-package com.example.sportpulse.ui
+package com.newswinnerapp.app.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -52,12 +52,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.sportpulse.domain.FavoriteTeam
-import com.example.sportpulse.domain.League
-import com.example.sportpulse.domain.MatchInfo
-import com.example.sportpulse.domain.NewsArticle
-import com.example.sportpulse.domain.TeamInfo
-import com.example.sportpulse.domain.shortDateTime
+import com.newswinnerapp.app.domain.FavoriteTeam
+import com.newswinnerapp.app.domain.League
+import com.newswinnerapp.app.domain.MatchInfo
+import com.newswinnerapp.app.domain.NewsArticle
+import com.newswinnerapp.app.domain.TeamInfo
+import com.newswinnerapp.app.domain.shortDateTime
 
 @Composable
 fun SportPulseApp(viewModel: SportsViewModel) {

@@ -1,7 +1,7 @@
-package com.example.sportpulse.data
+package com.newswinnerapp.app.data
 
 import android.content.Context
-import com.example.sportpulse.domain.FavoriteTeam
+import com.newswinnerapp.app.domain.FavoriteTeam
 import org.json.JSONArray
 import org.json.JSONObject
 

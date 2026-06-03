@@ -1,7 +1,7 @@
-package com.example.sportpulse.data
+package com.newswinnerapp.app.data
 
 import android.util.Xml
-import com.example.sportpulse.domain.NewsArticle
+import com.newswinnerapp.app.domain.NewsArticle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser

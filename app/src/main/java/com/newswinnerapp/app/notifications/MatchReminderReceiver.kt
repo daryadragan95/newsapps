@@ -1,4 +1,4 @@
-package com.example.sportpulse.notifications
+package com.newswinnerapp.app.notifications
 
 import android.Manifest
 import android.app.NotificationManager
@@ -9,7 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.example.sportpulse.R
+import com.newswinnerapp.app.R
 import kotlin.math.absoluteValue
 
 class MatchReminderReceiver : BroadcastReceiver() {

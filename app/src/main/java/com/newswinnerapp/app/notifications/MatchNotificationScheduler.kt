@@ -1,4 +1,4 @@
-package com.example.sportpulse.notifications
+package com.newswinnerapp.app.notifications
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -7,7 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.example.sportpulse.domain.MatchInfo
+import com.newswinnerapp.app.domain.MatchInfo
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone

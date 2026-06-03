@@ -1,4 +1,4 @@
-package com.example.sportpulse.domain
+package com.newswinnerapp.app.domain
 
 import java.text.SimpleDateFormat
 import java.util.Locale

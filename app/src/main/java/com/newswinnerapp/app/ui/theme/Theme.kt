@@ -1,4 +1,4 @@
-package com.example.sportpulse.ui.theme
+package com.newswinnerapp.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
