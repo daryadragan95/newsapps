@@ -116,42 +116,12 @@
           <li>Sports content, match data, team data, and news loaded from third-party sources.</li>
           <li>Locally saved favorite teams stored on your device.</li>
           <li>Notification preferences and scheduled match reminders.</li>
-          <li>WebView cookies, local storage, and website data when WebView content is opened.</li>
-          <li>Files or photos selected by you when a website inside WebView requests file upload.</li>
         </ul>
 
-        <h2>Firebase Remote Configuration Gate</h2>
+        <h2>Firebase</h2>
         <p>
-          The App uses Firebase Firestore to read a remote configuration value from collection
-          <strong>config</strong>, document <strong>app</strong>, field <strong>url</strong>.
-          This value determines whether the App opens native screens or a WebView page.
-        </p>
-        <p>
-          If a WebView URL is received, it may be stored locally in SharedPreferences so that
-          the App can continue opening the same WebView experience later, even if the remote
-          configuration value becomes empty.
-        </p>
-
-        <h2>WebView, Cookies, and Third-Party Websites</h2>
-        <p>
-          When WebView is opened, the website displayed inside it may use cookies, JavaScript,
-          DOM storage, and other web technologies. Those websites may collect information
-          according to their own privacy policies. We do not control third-party websites and
-          are not responsible for their privacy practices.
-        </p>
-
-        <h2>Camera and File Uploads</h2>
-        <p>
-          The App may request camera access only when a website inside WebView asks you to
-          take or upload a photo, for example to photograph a document. Photos are provided
-          to the website only after you choose to take or select them.
-        </p>
-
-        <h2>Downloads</h2>
-        <p>
-          If you download a file from WebView, the App may use the Android Download Manager
-          to save the file to your device. Downloaded files are controlled by your device and
-          Android system settings.
+          The App may use Firebase services to support app configuration and reliability.
+          Firebase may process technical information according to Google's privacy policy.
         </p>
 
         <h2>Notifications</h2>
@@ -164,23 +134,22 @@
         <h2>Third-Party Services</h2>
         <p>
           The App may use third-party services and data providers, including Firebase,
-          TheSportsDB, ESPN RSS feeds, and websites opened inside WebView. These services may
-          process data according to their own terms and privacy policies.
+          TheSportsDB, and ESPN RSS feeds. These services may process data according to their
+          own terms and privacy policies.
         </p>
 
         <h2>Data Stored on Your Device</h2>
         <p>
           The App stores some settings locally on your device, such as favorite teams,
-          cached WebView URL values, WebView website data, and cookies. You can remove this
-          data by clearing the App's storage or uninstalling the App.
+          notification settings, and app preferences. You can remove this data by clearing
+          the App's storage or uninstalling the App.
         </p>
 
         <h2>Children's Privacy</h2>
         <p>
           The App is not intended to knowingly collect personal information from children.
-          If you believe that a child has provided personal information through a third-party
-          website opened in WebView, please contact that website directly and review its
-          privacy policy.
+          If you believe that a child has provided personal information through the App,
+          please contact the app owner.
         </p>
 
         <h2>Changes to This Policy</h2>
