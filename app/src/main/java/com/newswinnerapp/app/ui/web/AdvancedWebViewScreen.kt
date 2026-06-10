@@ -15,6 +15,7 @@ import android.provider.MediaStore
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.DownloadListener
+import android.webkit.PermissionRequest
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.URLUtil
 import android.webkit.ValueCallback
@@ -36,7 +37,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,13 +62,13 @@ fun AdvancedWebViewScreen(
     val prefs = remember { context.getSharedPreferences("webview_cache", Context.MODE_PRIVATE) }
     val cachedUrl = remember { prefs.getString("cached_final_url", "") ?: "" }
     var currentUrl by remember { mutableStateOf(if (cachedUrl.isNotBlank()) cachedUrl else initialUrl) }
-    var stableCounter by remember { mutableIntStateOf(0) }
     val errorCounter = remember { AtomicInteger(0) }
     var lastErrorTime by remember { mutableLongStateOf(0L) }
     var webView by remember { mutableStateOf<WebView?>(null) }
     var filePathCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
     var pendingCameraLaunch by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var pendingPermissionRequest by remember { mutableStateOf<PermissionRequest?>(null) }
 
     fun finishFileChooser(result: Array<Uri>) {
         filePathCallback?.onReceiveValue(result)
@@ -120,6 +120,67 @@ fun AdvancedWebViewScreen(
             finishFileChooser(emptyArray())
         }
         pendingCameraLaunch = null
+    }
+
+    val requestWebViewPermissions = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { grantResults ->
+        val request = pendingPermissionRequest ?: return@rememberLauncherForActivityResult
+        pendingPermissionRequest = null
+
+        val grantedResources = request.resources.orEmpty().mapNotNull { resource ->
+            when (resource) {
+                PermissionRequest.RESOURCE_VIDEO_CAPTURE ->
+                    resource.takeIf { grantResults[Manifest.permission.CAMERA] == true }
+
+                PermissionRequest.RESOURCE_AUDIO_CAPTURE ->
+                    resource.takeIf { grantResults[Manifest.permission.RECORD_AUDIO] == true }
+
+                else -> null
+            }
+        }.toTypedArray()
+
+        if (grantedResources.isNotEmpty()) {
+            request.grant(grantedResources)
+        } else {
+            request.deny()
+        }
+    }
+
+    fun grantWebViewPermissions(ctx: Context, request: PermissionRequest) {
+        val resources = request.resources.orEmpty()
+        val permissionsToRequest = buildList {
+            if (
+                PermissionRequest.RESOURCE_VIDEO_CAPTURE in resources &&
+                ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+            ) {
+                add(Manifest.permission.CAMERA)
+            }
+            if (
+                PermissionRequest.RESOURCE_AUDIO_CAPTURE in resources &&
+                ContextCompat.checkSelfPermission(ctx, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
+            ) {
+                add(Manifest.permission.RECORD_AUDIO)
+            }
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            pendingPermissionRequest?.deny()
+            pendingPermissionRequest = request
+            requestWebViewPermissions.launch(permissionsToRequest.toTypedArray())
+            return
+        }
+
+        val grantedResources = resources.filter { resource ->
+            resource == PermissionRequest.RESOURCE_VIDEO_CAPTURE ||
+                resource == PermissionRequest.RESOURCE_AUDIO_CAPTURE
+        }.toTypedArray()
+
+        if (grantedResources.isNotEmpty()) {
+            request.grant(grantedResources)
+        } else {
+            request.deny()
+        }
     }
 
     fun createCameraImageUri(ctx: Context): Uri {
@@ -276,6 +337,17 @@ fun AdvancedWebViewScreen(
                 })
 
                 webChromeClient = object : WebChromeClient() {
+                    override fun onPermissionRequest(request: PermissionRequest) {
+                        grantWebViewPermissions(ctx, request)
+                    }
+
+                    override fun onPermissionRequestCanceled(request: PermissionRequest) {
+                        if (pendingPermissionRequest === request) {
+                            pendingPermissionRequest = null
+                        }
+                        super.onPermissionRequestCanceled(request)
+                    }
+
                     override fun onShowFileChooser(
                         webView: WebView?,
                         filePathCallback_: ValueCallback<Array<Uri>>?,
@@ -309,8 +381,7 @@ fun AdvancedWebViewScreen(
                             .replace("?&", "?")
                             .replace("??", "?")
                         currentUrl = cleaned
-                        stableCounter += 1
-                        if (stableCounter >= 3 && cleaned.startsWith("http")) {
+                        if (cleaned.startsWith("http")) {
                             prefs.edit { putString("cached_final_url", cleaned) }
                         }
                         CookieManager.getInstance().flush()
@@ -348,9 +419,7 @@ fun AdvancedWebViewScreen(
                         val now = System.currentTimeMillis()
                         val last = lastErrorTime
                         if (now - last <= 5_000L) {
-                            if (errorCounter.incrementAndGet() >= 2) {
-                                prefs.edit { remove("cached_final_url") }
-                            }
+                            errorCounter.incrementAndGet()
                         } else {
                             errorCounter.set(1)
                         }

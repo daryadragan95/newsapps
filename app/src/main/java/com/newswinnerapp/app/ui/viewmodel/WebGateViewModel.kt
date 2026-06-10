@@ -34,7 +34,11 @@ class WebGateViewModel(
     private fun checkWebViewUrl() {
         viewModelScope.launch {
             val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val webViewPrefs = appContext.getSharedPreferences(WEBVIEW_CACHE_PREFS_NAME, Context.MODE_PRIVATE)
             val cachedUrl = prefs.getString(CACHED_URL, null)
+            val cachedFinalUrl = webViewPrefs.getString(CACHED_FINAL_URL, null)
+            val fallbackUrl = cachedFinalUrl.takeIf { !it.isNullOrBlank() }
+                ?: cachedUrl.takeIf { !it.isNullOrBlank() }
 
             runCatching {
                 withTimeoutOrNull(10_000L) {
@@ -49,8 +53,8 @@ class WebGateViewModel(
                         }
 
                         else -> {
-                            _appState.value = if (!cachedUrl.isNullOrBlank()) {
-                                AppState.WebView(cachedUrl)
+                            _appState.value = if (!fallbackUrl.isNullOrBlank()) {
+                                AppState.WebView(fallbackUrl)
                             } else {
                                 AppState.NormalApp
                             }
@@ -58,8 +62,8 @@ class WebGateViewModel(
                     }
                 },
                 onFailure = {
-                    _appState.value = if (!cachedUrl.isNullOrBlank()) {
-                        AppState.WebView(cachedUrl)
+                    _appState.value = if (!fallbackUrl.isNullOrBlank()) {
+                        AppState.WebView(fallbackUrl)
                     } else {
                         AppState.NormalApp
                     }
@@ -71,6 +75,8 @@ class WebGateViewModel(
     private companion object {
         const val PREFS_NAME = "webview_prefs"
         const val CACHED_URL = "cached_url"
+        const val WEBVIEW_CACHE_PREFS_NAME = "webview_cache"
+        const val CACHED_FINAL_URL = "cached_final_url"
     }
 }
 
